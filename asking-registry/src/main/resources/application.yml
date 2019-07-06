@@ -1,0 +1,18 @@
+server:
+  port: 10086
+spring:
+  application:
+    name: asking-registry
+eureka:
+  instance:
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+    hostname: localhost
+  client:
+    register-with-eureka: false #是否将自己注册到Eureka Server
+    fetch-registry: false     #是否从Eureka Server获取注册信息
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    enable-self-preservation: false #关闭自我保护
+    eviction-interval-timer-in-ms: 5000  #每隔5秒进行一次服务列表清理
