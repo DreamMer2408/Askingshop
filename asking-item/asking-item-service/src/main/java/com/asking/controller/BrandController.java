@@ -50,4 +50,13 @@ public class BrandController {
         logger.info("保存品牌信息完成");
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
+
+    @GetMapping("cid/{cid}")
+    public ResponseEntity<List<Brand>> queryBrandByCategoryId(@PathVariable("cid")Long cid){
+        List<Brand> brandList=brandService.queryBrandByCid(cid);
+        if(brandList==null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(brandList);
+    }
 }

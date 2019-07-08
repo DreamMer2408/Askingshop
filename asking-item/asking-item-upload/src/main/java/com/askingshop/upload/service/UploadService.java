@@ -1,7 +1,11 @@
 package com.askingshop.upload.service;
 
+import com.github.tobato.fastdfs.domain.StorePath;
+import com.github.tobato.fastdfs.service.FastFileStorageClient;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +30,11 @@ public class UploadService {
     //支持的文件类型
     private static final List<String> suffixes= Arrays.asList("image/png","image/jpeg");
 
+    @Autowired
+    FastFileStorageClient storageClient;
+
     public String upload(MultipartFile file){
+        logger.info("开始上传图片");
         try {
             //1.图片信息校验
             //1)校验文件类型
@@ -41,19 +49,18 @@ public class UploadService {
                 logger.info("上传失败，文件内容不符合要求");
                 return null;
             }
-            //2.保存图片
-            //1)生成保存目录
-            File dir=new File("D:\\heima\\upload");
-            if (!dir.exists()){
-                dir.mkdirs();
-            }
-            //2)保存图片
-            file.transferTo(new File(dir,file.getOriginalFilename()));
+            //2.将图片上传到fastDFS
+            //1)获取图片后缀名
+            String extension= StringUtils.substringAfterLast(file.getOriginalFilename(),".");
+            //2)上传
+            StorePath storePath=storageClient.uploadFile(file.getInputStream(),file.getSize(),extension,null);
 
             //3)拼接图片地址
-            String url="http://image.askingshop.com/upload/"+file.getOriginalFilename();
+            String url="http://192.168.136.135:91/"+storePath.getFullPath();
+            logger.info("上传成功，图片路径：{}",url);
             return url;
         }catch (Exception e){
+            logger.info(e.getMessage());
             return null;
         }
     }
