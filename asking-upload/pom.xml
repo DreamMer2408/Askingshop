@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.asking.service</groupId>
-    <artifactId>asking-item-upload</artifactId>
+    <groupId>com.asking.upload</groupId>
+    <artifactId>asking-upload</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>

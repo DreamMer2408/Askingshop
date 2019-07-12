@@ -8,9 +8,11 @@ import com.github.pagehelper.PageHelper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.xml.ws.Action;
@@ -44,6 +46,9 @@ public class GoodsService {
     private SkuMapper skuMapper;
     @Autowired
     private StockMapper stockMapper;
+
+    @Autowired
+    private AmqpTemplate amqpTemplate;
 
     private static final Logger logger= LoggerFactory.getLogger(GoodsService.class);
     public PageResult<SpuBo> querySpuByPage(int page,int rows,String sortBy,boolean desc,String key,boolean saleable){
@@ -86,6 +91,11 @@ public class GoodsService {
         return new PageResult<>(pageInfo.getTotal(),list);
     }
 
+    /**
+     * 保存商品
+     * @param spuBo
+     */
+    @Transactional(rollbackFor = Exception.class)
     public void saveGoods(SpuBo spuBo){
         //保存spu
         spuBo.setSaleable(true);
@@ -102,6 +112,9 @@ public class GoodsService {
 
         //保存Sku和库存信息
         saveSkuAndStock(spuBo.getSkus(),spuBo.getId());
+
+        //发送消息到mq
+        sendMessage(spuBo.getId(),"insert");
     }
 
     private void saveSkuAndStock(List<Sku> skus,long id){
@@ -124,6 +137,59 @@ public class GoodsService {
         }
     }
 
+    /**
+     * 更新商品信息
+     * @param spuBo
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateGoods(SpuBo spuBo){
+
+        //更新spu
+        spuBo.setSaleable(true);
+        spuBo.setValid(true);
+        spuBo.setLastUpdateTime(new Date());
+        spuMapper.updateByPrimaryKeySelective(spuBo);
+
+        //更新spu详情
+        SpuDetail spuDetail=spuBo.getSpuDetail();
+        String oldTemp=spuDetailMapper.selectByPrimaryKey(spuBo.getId()).getSpecTemplate();
+        if (spuDetail.getSpecTemplate().equals(oldTemp)){
+            //更新sku和库存信息
+            updateSkuAndStock(spuBo.getSkus(),spuBo.getId(),"true");
+        }else {
+            updateSkuAndStock(spuBo.getSkus(),spuBo.getId(),"false");
+        }
+        spuDetail.setSpuId(spuBo.getId());
+        spuDetailMapper.updateByPrimaryKeySelective(spuDetail);
+
+        //发送消息到mq
+        sendMessage(spuBo.getId(),"update");
+    }
+
+    /**
+     * 商品删除二合一（多个、单个）
+     * @param id
+     */
+    public void deleteGoods(long id){
+        //删除spu表中的数据
+        spuMapper.deleteByPrimaryKey(id);
+
+        //删除spu_detail中的数据
+        Example example=new Example(SpuDetail.class);
+        example.createCriteria().andEqualTo("spuId",id);
+        spuDetailMapper.deleteByExample(example);
+
+        List<Sku> skuList=skuMapper.selectByExample(example);
+        for (Sku sku:skuList) {
+            //删除sku中的数据
+            skuMapper.deleteByPrimaryKey(sku.getId());
+            //删除stock中的数据
+            stockMapper.deleteByPrimaryKey(sku.getId());
+        }
+
+        //发送消息到mq
+        sendMessage(id,"delete");
+    }
     /**
      * 根据id查询商品信息
      * @param id
@@ -163,5 +229,19 @@ public class GoodsService {
         spuBo.setSkus(skus);
         logger.info("查询商品信息结束");
         return spuBo;
+    }
+
+    /**
+     * 发送消息到mq，生产者
+     * @param id
+     * @param type
+     */
+    public void sendMessage(Long id,String type){
+        logger.info("开始发送{}商品信息，商品id:{}",type,id);
+        try {
+            amqpTemplate.convertAndSend("item."+type,id);
+        }catch (Exception e){
+            logger.error("{}商品信息发送异常，商品id：{}",type,id);
+        }
     }
 }

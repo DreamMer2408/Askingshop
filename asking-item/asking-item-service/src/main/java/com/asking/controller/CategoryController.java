@@ -45,4 +45,14 @@ public class CategoryController {
         //500:服务器内部错误
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+
+
+    @GetMapping("/names")
+    public ResponseEntity<List<String>> queryNameByIds(@RequestParam("ids")List<Long> ids){
+        List<String> list=categoryService.queryNameByIds(ids);
+        if (list==null||list.size()<1){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(list);
+    }
 }
