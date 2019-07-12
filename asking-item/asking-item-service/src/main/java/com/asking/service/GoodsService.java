@@ -155,9 +155,9 @@ public class GoodsService {
         String oldTemp=spuDetailMapper.selectByPrimaryKey(spuBo.getId()).getSpecTemplate();
         if (spuDetail.getSpecTemplate().equals(oldTemp)){
             //更新sku和库存信息
-            updateSkuAndStock(spuBo.getSkus(),spuBo.getId(),"true");
+            //updateSkuAndStock(spuBo.getSkus(),spuBo.getId(),"true");
         }else {
-            updateSkuAndStock(spuBo.getSkus(),spuBo.getId(),"false");
+            //updateSkuAndStock(spuBo.getSkus(),spuBo.getId(),"false");
         }
         spuDetail.setSpuId(spuBo.getId());
         spuDetailMapper.updateByPrimaryKeySelective(spuDetail);
