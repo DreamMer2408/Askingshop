@@ -1,6 +1,7 @@
 package com.asking.mapper;
 
 import com.asking.item.pojo.Brand;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -15,4 +16,7 @@ public interface BrandMapper extends Mapper<Brand> {
 
     @Select("select b.* from tb_brand b left join tb_category_brand cb on b.id=cb.brand_id where cb.category_id=#{cid}")
     List<Brand> qureyBrandByCid(Long cid);
+
+    @Delete("DELETE FROM tb_category_brand WHERE brand_id = #{bid}")
+    void deleteByBrandIdInCategoryBrand(@Param("bid") Long bid);
 }

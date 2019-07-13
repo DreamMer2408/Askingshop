@@ -18,4 +18,7 @@ public interface CategoryMapper extends Mapper<Category> {
 
     @Select("select * from tb_category where id=(select max(id) from tb_category)")
     List<Category> selectLast();
+
+    @Select("select * from tb_category where id in(select category_id from tb_category_brand where brand_id=#{bid})")
+    List<Category> queryByBrandId(@Param("bid")long bid);
 }

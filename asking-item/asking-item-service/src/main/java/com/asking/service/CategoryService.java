@@ -137,6 +137,15 @@ public class CategoryService {
     }
 
     /**
+     * 根据brand_id查询分类信息
+     * @param bid
+     * @return
+     */
+    public List<Category> queryByBrandId(long bid){
+        logger.info("查询商品id：{}",bid);
+        return categoryMapper.queryByBrandId(bid);
+    }
+    /**
      * 更新节点
      * @param category
      */

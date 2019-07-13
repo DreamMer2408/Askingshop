@@ -2,7 +2,7 @@ package com.asking.service;
 
 import com.asking.item.pojo.*;
 import com.asking.mapper.*;
-import com.askingshop.common.pojo.PageResult;
+import com.asking.common.pojo.PageResult;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.apache.commons.lang.StringUtils;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import javax.xml.ws.Action;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;

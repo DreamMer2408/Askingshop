@@ -1,10 +1,10 @@
-package com.askingshop.common.pojo;
+package com.asking.common.pojo;
 
 import java.util.List;
 
 /**
  * @ClassName PageResult
- * @Description TODO
+ * @Description 分页
  * @Author wangs
  * @Date 2019/7/4 20:43
  * @Version 1.0

@@ -56,6 +56,18 @@ public class CategoryController {
     }
 
     /**
+     * 更新
+     * @param category
+     * @return
+     */
+    @PutMapping
+    public ResponseEntity<Void> updateCategory(Category category){
+        logger.info("保存修改,id:{}",category.getId());
+        categoryService.updateCategory(category);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    /**
      * 删除节点
      * @param id
      * @return
@@ -66,19 +78,24 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    /**
-     * 更新
-     * @param category
-     * @return
-     */
-    @PutMapping
-    public ResponseEntity<Void> updateCategory(Category category){
-        categoryService.updateCategory(category);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
-    }
+
     @GetMapping("/names")
     public ResponseEntity<List<String>> queryNameByIds(@RequestParam("ids")List<Long> ids){
         List<String> list=categoryService.queryNameByIds(ids);
+        if (list==null||list.size()<1){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(list);
+    }
+    /**
+     * 商品分类信息的回显
+     * @param bid
+     * @return
+     */
+    @GetMapping("bid/{bid}")
+    public ResponseEntity<List<Category>> queryByBrandId(@PathVariable("bid")long bid){
+        logger.info("开始商品信息查询");
+        List<Category> list=categoryService.queryByBrandId(bid);
         if (list==null||list.size()<1){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
