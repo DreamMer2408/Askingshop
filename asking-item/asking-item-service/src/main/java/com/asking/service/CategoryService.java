@@ -154,6 +154,12 @@ public class CategoryService {
         categoryMapper.updateByPrimaryKeySelective(category);
         logger.info("节点已修改");
     }
+
+    /**
+     * 根据ids查询名字
+     * @param asList
+     * @return
+     */
     public List<String> queryNameByIds(List<Long> asList){
         List<String> names=new ArrayList<>();
         if(asList!=null&&asList.size()!=0){

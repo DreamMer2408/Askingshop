@@ -1,5 +1,6 @@
 package com.asking.service;
 
+import com.asking.item.bo.SpuBo;
 import com.asking.item.pojo.*;
 import com.asking.mapper.*;
 import com.asking.common.pojo.PageResult;
@@ -50,7 +51,7 @@ public class GoodsService {
     private AmqpTemplate amqpTemplate;
 
     private static final Logger logger= LoggerFactory.getLogger(GoodsService.class);
-    public PageResult<SpuBo> querySpuByPage(int page,int rows,String sortBy,boolean desc,String key,boolean saleable){
+    public PageResult<SpuBo> querySpuByPage(int page, int rows, String sortBy, boolean desc, String key, boolean saleable){
        logger.info("开始商品分页查询");
        logger.info("传入参数-->page:{},rows:{},sortBy:{},desc:{},key:{},saleable:{}",page,rows,sortBy,desc,key,saleable);
         //1.查询Spu，分页查询，最多100条
@@ -154,9 +155,9 @@ public class GoodsService {
         String oldTemp=spuDetailMapper.selectByPrimaryKey(spuBo.getId()).getSpecTemplate();
         if (spuDetail.getSpecTemplate().equals(oldTemp)){
             //更新sku和库存信息
-            //updateSkuAndStock(spuBo.getSkus(),spuBo.getId(),"true");
+            updateSkuAndStock(spuBo.getSkus(),spuBo.getId(),true);
         }else {
-            //updateSkuAndStock(spuBo.getSkus(),spuBo.getId(),"false");
+            updateSkuAndStock(spuBo.getSkus(),spuBo.getId(),false);
         }
         spuDetail.setSpuId(spuBo.getId());
         spuDetailMapper.updateByPrimaryKeySelective(spuDetail);
@@ -165,6 +166,77 @@ public class GoodsService {
         sendMessage(spuBo.getId(),"update");
     }
 
+    private void updateSkuAndStock(List<Sku> skus,long id,boolean tag){
+        //通过tag判断是insert还是update
+        //获取当前数据库中spu_id=id的sku信息
+        Example example=new Example(Sku.class);
+        example.createCriteria().andEqualTo("spuId",id);
+        //oldList中保存数据库中spu_id=id的sku
+        List<Sku> oldList=skuMapper.selectByExample(example);
+        if (tag){
+            int count=0;
+            for (Sku sku:skus){
+                if (!sku.getEnable()){
+                    continue;
+                }
+                for (Sku old:oldList){
+                    if (sku.getOwnSpec().equals(old.getOwnSpec())){
+                        List<Sku> list=skuMapper.select(old);
+                        if (sku.getPrice()==null){
+                            sku.setPrice(0L);
+                        }
+                        if (sku.getStock()==null){
+                            sku.setStock(0L);
+                        }
+                        sku.setId(list.get(0).getId());
+                        sku.setCreateTime(list.get(0).getCreateTime());
+                        sku.setLastUpdateTime(new Date());
+                        sku.setSpuId(list.get(0).getSpuId());
+                        skuMapper.updateByPrimaryKey(sku);
+
+                        Stock stock=new Stock();
+                        stock.setSkuId(sku.getId());
+                        stock.setStock(sku.getStock());
+                        stockMapper.updateByPrimaryKeySelective(stock);
+
+                        oldList.remove(old);
+                        break;
+                    }else {
+                        count++;
+                    }
+                }
+                if (count==oldList.size()&&count!=0){
+                    List<Sku> addSku=new ArrayList<>();
+                    addSku.add(sku);
+                    saveSkuAndStock(addSku,id);
+                    count=0;
+                }else {
+                    count=0;
+                }
+            }
+            //处理脏数据
+            if (oldList.size()!=0){
+                for (Sku sku:oldList){
+                    skuMapper.deleteByPrimaryKey(sku.getId());
+                    Example example1=new Example(Stock.class);
+                    example1.createCriteria().andEqualTo("skuId",sku.getId());
+                    stockMapper.deleteByExample(example1);
+                }
+            }
+        }else {
+            List<Long> ids=oldList.stream().map(Sku::getId).collect(Collectors.toList());
+            //删除以前的库存
+            Example example1=new Example(Stock.class);
+            example1.createCriteria().andEqualTo("skuId",ids);
+            stockMapper.deleteByExample(example1);
+            //删除以前的sku
+            Example example2=new Example(Sku.class);
+            example2.createCriteria().andEqualTo("spuId",id);
+            skuMapper.deleteByExample(example2);
+
+            saveSkuAndStock(skus,id);
+        }
+    }
     /**
      * 商品删除二合一（多个、单个）
      * @param id
@@ -196,6 +268,11 @@ public class GoodsService {
      */
     public SpuBo queryGoodsById(long id){
         logger.info("查询商品信息，id:{}",id);
+        /**
+         *  第一页所需信息如下
+         *  1.商品的分类信息、所属品牌、商品标题、商品卖点（子标题）
+         *  2.商品的包装清单、售后服务
+         */
         Spu spu= spuMapper.selectByPrimaryKey(id);
         if (spu==null){
             logger.info("spu查询为空!");
@@ -241,6 +318,38 @@ public class GoodsService {
             amqpTemplate.convertAndSend("item."+type,id);
         }catch (Exception e){
             logger.error("{}商品信息发送异常，商品id：{}",type,id);
+        }
+    }
+
+    /**
+     * 商品上下架
+     * @param id
+     */
+    @Transactional
+    public void goodsSoldOut(Long id){
+        //下架或上架spu中的商品
+        Spu oldSpu=spuMapper.selectByPrimaryKey(id);
+        Example example=new Example(Sku.class);
+        example.createCriteria().andEqualTo("spuId",id);
+        List<Sku> skuList=skuMapper.selectByExample(example);
+        if (oldSpu.getSaleable()){
+            //下架
+            oldSpu.setSaleable(false);
+            spuMapper.updateByPrimaryKeySelective(oldSpu);
+            //下架sku中的具体商品
+            for (Sku sku:skuList){
+                sku.setEnable(false);
+                skuMapper.updateByPrimaryKeySelective(sku);
+            }
+        }else {
+            //上架
+            oldSpu.setSaleable(true);
+            spuMapper.updateByPrimaryKeySelective(oldSpu);
+            //上架sku中的具体商品
+            for (Sku sku:skuList){
+                sku.setEnable(true);
+                skuMapper.updateByPrimaryKeySelective(sku);
+            }
         }
     }
 }

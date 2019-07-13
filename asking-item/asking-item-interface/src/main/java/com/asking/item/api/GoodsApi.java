@@ -1,7 +1,7 @@
 package com.asking.item.api;
 
 import com.asking.item.pojo.Sku;
-import com.asking.item.pojo.SpuBo;
+import com.asking.item.bo.SpuBo;
 import com.asking.item.pojo.SpuDetail;
 import com.asking.common.pojo.PageResult;
 import org.springframework.web.bind.annotation.PathVariable;

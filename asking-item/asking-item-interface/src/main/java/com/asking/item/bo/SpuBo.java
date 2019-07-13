@@ -1,4 +1,8 @@
-package com.asking.item.pojo;
+package com.asking.item.bo;
+
+import com.asking.item.pojo.Sku;
+import com.asking.item.pojo.Spu;
+import com.asking.item.pojo.SpuDetail;
 
 import javax.persistence.Transient;
 import java.util.List;

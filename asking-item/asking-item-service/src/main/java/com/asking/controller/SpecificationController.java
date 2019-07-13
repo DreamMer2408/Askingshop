@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * @ClassName SpecificationController
- * @Description TODO
+ * @Description 规格参数模板
  * @Author wangs
  * @Date 2019/7/7 0:59
  * @Version 1.0

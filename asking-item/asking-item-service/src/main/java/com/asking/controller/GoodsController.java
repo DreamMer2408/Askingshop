@@ -1,6 +1,6 @@
 package com.asking.controller;
 
-import com.asking.item.pojo.SpuBo;
+import com.asking.item.bo.SpuBo;
 import com.asking.service.GoodsService;
 import com.asking.common.pojo.PageResult;
 import org.slf4j.Logger;
@@ -25,6 +25,16 @@ public class GoodsController {
     private GoodsService goodsService;
     private static final Logger logger= LoggerFactory.getLogger(GoodsController.class);
 
+    /**
+     * 分页查询商品信息
+     * @param page
+     * @param rows
+     * @param sortBy
+     * @param desc
+     * @param key
+     * @param saleable
+     * @return
+     */
     @GetMapping("/spu/page")
     public ResponseEntity<PageResult<SpuBo>> querySpuByPage(
             @RequestParam(value = "page",defaultValue = "1")int page,
@@ -40,6 +50,11 @@ public class GoodsController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * 新增商品信息
+     * @param spuBo
+     * @return
+     */
     @PostMapping
     public ResponseEntity<Void> saveGoods(@RequestBody SpuBo spuBo){
         goodsService.saveGoods(spuBo);
@@ -60,5 +75,46 @@ public class GoodsController {
         }
         logger.info(HttpStatus.OK.toString());
         return ResponseEntity.ok(spuBo);
+    }
+
+    /**
+     * 修改商品
+     * @param spuBo
+     * @return
+     */
+    @PutMapping
+    public ResponseEntity<Void> updateGoods(@RequestBody SpuBo spuBo){
+        goodsService.updateGoods(spuBo);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    /**
+     * 删除商品
+     * @param idString
+     * @return
+     */
+    @DeleteMapping
+    public ResponseEntity<Void> deleteGoods(@PathVariable("id")String idString){
+        String separator="-";
+        if (idString.contains(separator)){
+            String[] goodsId=idString.split(separator);
+            for (String id:goodsId){
+                goodsService.deleteGoods(Long.parseLong(id));
+            }
+        }else {
+            goodsService.deleteGoods(Long.parseLong(idString));
+        }
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * 商品上下架
+     * @param id
+     * @return
+     */
+    @PutMapping("/spu/out/{id}")
+    public ResponseEntity<Void> goodsSoldOut(@PathVariable("id")Long id){
+        goodsService.goodsSoldOut(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
