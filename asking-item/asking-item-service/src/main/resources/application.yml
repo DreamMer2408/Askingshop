@@ -10,6 +10,8 @@ spring:
     hikari:
       maximum-pool-size: 30
       minimum-idle: 10
+  main:
+    allow-bean-definition-overriding: true
   rabbitmq:
     host: 192.168.136.135
     username: /guest

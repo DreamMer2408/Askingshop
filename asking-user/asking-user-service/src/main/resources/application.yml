@@ -10,6 +10,21 @@ spring:
     hikari:
       maximum-pool-size: 20
       minimum-idle: 10
+  redis:
+    host: 192.168.136.135
+    password: 123456
+  rabbitmq:
+    host: 192.168.136.135
+    username: /askingshop
+    password: askingshop
+    virtual-host: /askingshop
+    template:
+      retry:
+        enabled: true
+        max-interval: 210000ms
+        initial-interval: 10000ms
+        multiplier: 2
+    publisher-confirms: true
 eureka:
   client:
     service-url:

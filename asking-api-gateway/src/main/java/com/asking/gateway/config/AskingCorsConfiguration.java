@@ -22,6 +22,7 @@ public class AskingCorsConfiguration {
 
         //允许的域，不要写*，否则cookie不能用
         configuration.addAllowedOrigin("http://manage.askingshop.com");
+        configuration.addAllowedOrigin("http://www.askingshop.com");
         //是否发送cookie信息
         configuration.setAllowCredentials(true);
         //允许的请求方式

@@ -4,9 +4,9 @@ spring:
   application:
     name: sms-service
   rabbitmq:
-    virtual-host: /asking
-    username: /guest
-    password: guest
+    virtual-host: /askingshop
+    username: /askingshop
+    password: askingshop
     host: 192.168.136.135
 
 asking:
@@ -14,4 +14,4 @@ asking:
     accessKeyId: LTAIAmUoi6ZhVUJn
     accessKeySecret: 5YuCHRrFOV0HtubpEY1G0cEA0zjP5e
     SignName: AskingShop商城
-    TemplateCode: SMS_170330126
+    verify-code-template: SMS_170330126
