@@ -80,26 +80,35 @@ public class UserService {
      * @return
      */
     public User queryUser(String username,String password){
+        logger.info("开始查询用户，username:{},password:{}",username,password);
         //缓存中查询
         BoundHashOperations<String,Object,Object> hashOperations=redisTemplate.boundHashOps(KEY_PREFIX2);
         String userStr=(String) hashOperations.get(username);
+        logger.info("在缓存中获取到user:{}",userStr);
         User user;
         if (StringUtils.isEmpty(userStr)){
             //缓存中没查到，去数据库中查，查到放到缓存中
+            logger.info("缓存中获取到的不能用啊老哥");
             User record=new User();
             record.setUsername(username);
+            logger.info("不着急，老哥从数据库中再找");
             user=userMapper.selectOne(record);
+            logger.info("在数据库中找到user:{}",user);
             hashOperations.put(user.getUsername(), JsonUtils.serialize(user));
+            logger.info("已放到缓存中");
         }else {
             user=JsonUtils.parse(userStr,User.class);
         }
 
         if (user==null){
+            logger.info("没找到用户");
             return null;
         }
 
         boolean result=CodeUtils.passwordBcryptDecode(username+password,user.getPassword());
+        logger.info("result:{}",result);
         if (!result){
+            logger.info("将返回null");
             return null;
         }
         return user;

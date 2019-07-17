@@ -11,6 +11,7 @@
         <module>asking-user</module>
         <module>asking-sms</module>
         <module>demo-elastic</module>
+        <module>asking-authentication</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
