@@ -18,4 +18,5 @@ Asking商城是一个全品类的电商购物网站（B2C）。用户可以在�
 |Redis|分布式缓存|
 |Docker|应用容器引擎|
 |JWT|JWT登录支持|
-
+## 开发进度：
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20190717215942417.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0RSX2VhbU1lcg==,size_16,color_FFFFFF,t_70)
