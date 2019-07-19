@@ -1,0 +1,19 @@
+server:
+  port: 8088
+spring:
+  application:
+    name: cast-service
+  redis:
+    host: 192.168.136.135
+    password: 123456
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1/eureka/
+    registry-fetch-interval-seconds: 10
+  instance:
+    instance-id: ${spring.application.name}:${server.port}
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+    lease-expiration-duration-in-seconds: 10
+    lease-renewal-interval-in-seconds: 5

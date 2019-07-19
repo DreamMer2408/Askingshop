@@ -41,7 +41,7 @@ public class AuthService {
             if (user==null){
                 return null;
             }
-            String token= JwtUtils.generateToken(new UserInfo(user.getId(),user.getPassword()),jwtProperties.getPrivateKey(),jwtProperties.getExpire());
+            String token= JwtUtils.generateToken(new UserInfo(user.getId(),user.getUsername()),jwtProperties.getPrivateKey(),jwtProperties.getExpire());
             logger.info("生成token,{}",token);
             return token;
         }catch (Exception e){

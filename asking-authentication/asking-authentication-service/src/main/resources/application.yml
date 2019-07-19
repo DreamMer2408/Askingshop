@@ -21,4 +21,5 @@ asking:
     pubKeyPath: D:\\temp\\rsa\\rsa.pub
     priKeyPath: D:\\temp\\rsa\\rsa.pri
     expire: 30    #过期时间
+    cookieName: Asking_token
 

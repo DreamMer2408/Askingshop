@@ -27,7 +27,7 @@ public class User {
     @Length(min = 1,max = 15,message = "用户名只能在4~15位之间")
     private String username;
     //密码
-    @JsonIgnore     //在json序列化时，就不会把password和salt返回。
+//    @JsonIgnore     //在json序列化时，就不会把password和salt返回。
     @Length(min = 6,max = 25,message = "密码只能在6~25位之间")
     private String password;
     //电话

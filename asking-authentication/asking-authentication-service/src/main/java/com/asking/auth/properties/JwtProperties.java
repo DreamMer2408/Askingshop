@@ -33,7 +33,6 @@ public class JwtProperties {
     private PublicKey publicKey;
     private PrivateKey privateKey;
     private String cookieName;
-    private Integer cookieMaxAge;
     private static final Logger logger= LoggerFactory.getLogger(JwtProperties.class);
 
     public String getSecret() {
@@ -92,13 +91,6 @@ public class JwtProperties {
         this.cookieName = cookieName;
     }
 
-    public Integer getCookieMaxAge() {
-        return cookieMaxAge;
-    }
-
-    public void setCookieMaxAge(Integer cookieMaxAge) {
-        this.cookieMaxAge = cookieMaxAge;
-    }
 
     /**
      * 构造方法之后执行该方法
